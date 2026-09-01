@@ -1,1 +1,0 @@
-from .xenium import MultiqcModule
