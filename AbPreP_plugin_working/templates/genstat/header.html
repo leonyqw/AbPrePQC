@@ -1,0 +1,24 @@
+{# #######################
+  header.html
+##########################
+
+This block gives the introduction content at the top of each report.
+That is, the page title, welcome message, details of where the report
+was generated and the button that launches the welcome tour.
+
+#}
+
+<h1 id="page_title">{{ config.title }} : MultiQC Report</h1>
+
+<p>
+  Report generated on {{ report.creation_date.strftime('%Y-%m-%d, %H:%M %Z') }} based on data in:
+  {% if report.analysis_files | length == 1 %}
+    <code class="mqc_analysis_path">{{ report.analysis_files[0] }}</code>
+  {% else %}
+    <ul>
+      {% for d in report.analysis_files %}
+        <li><code class="mqc_analysis_path">{{ d }}</code></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</p>

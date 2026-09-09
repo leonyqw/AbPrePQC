@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.5"
+  - "3.4"
+  - "2.7"
+# command to install dependencies
+install:
+  - pip install git+git://github.com/ewels/MultiQC.git
+  - python setup.py -q install
+  - wget https://github.com/ewels/MultiQC_TestData/archive/master.zip
+  - unzip master.zip -d data
+# command to run tests
+script:
+  - multiqc data -t ngi
+  - multiqc data/MultiQC_TestData-master/data/ngi -f -t ngi --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json
+  - multiqc data/MultiQC_TestData-master/data/ngi -f -t genstat --test-db data/MultiQC_TestData-master/data/ngi/ngi_db_data.json

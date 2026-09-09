@@ -1,0 +1,40 @@
+{# #######################
+  footer.html
+##########################
+
+Content for the report footer.
+
+#}
+
+<div>
+  <p>
+    <a href="http://www.scilifelab.se/" target="_blank" class="float-end">
+      <img
+        src="data:image/png;base64,{{ include_file('assets/img/SciLifeLab_Logotype_Green_NEG.png', b64=True) }}"
+        style="height:41px;"
+        class="scilifelab-logo"
+      />
+    </a>
+    <strong><a href="http://multiqc.info" target="_blank">MultiQC v{{ config.version }}</a></strong>
+    - Written and maintained by <a href="http://phil.ewels.co.uk" target="_blank">Phil Ewels</a> at
+    <a href="https://seqera.io/" target="_blank">Seqera Labs</a>, originally at SciLifeLab Sweden and available on
+    <a href="https://github.com/MultiQC/MultiQC" target="_blank">GitHub</a>.
+  </p>
+  <p>
+    This report uses <a href="https://www.plotly.com/" target="_blank">Plotly</a>,
+    <a href="https://jquery.com/" target="_blank">jQuery</a>,
+    <a href="https://jqueryui.com/" target="_blank">jQuery UI</a>,
+    <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> and
+    <a href="https://github.com/eligrey/FileSaver.js" target="_blank">FileSaver.js</a>.
+  </p>
+</div>
+
+<style>
+  .scilifelab-logo {
+    content: url("data:image/png;base64,{{ include_file('assets/img/SciLifeLab.png', b64=True) }}");
+  }
+
+  [data-bs-theme="dark"] .scilifelab-logo {
+    content: url("data:image/png;base64,{{ include_file('assets/img/SciLifeLab_Logotype_Green_NEG.png', b64=True) }}");
+  }
+</style>

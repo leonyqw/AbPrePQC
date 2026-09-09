@@ -19,14 +19,6 @@ repos:
     hooks:
       - id: remove-crlf
 
-  - repo: https://github.com/rbubley/mirrors-prettier
-    rev: "v3.7.4"
-    hooks:
-      - id: prettier
-        additional_dependencies:
-          - prettier@3.7.4
-          - prettier-plugin-jinja-template@2.1.0
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.14.11"
     hooks:
