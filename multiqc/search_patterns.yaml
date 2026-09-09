@@ -1231,3 +1231,6 @@ ataqv:
   num_lines: 10
 mosaicatcher:
   fn: "*.mosaicatcher_info_raw.txt"
+matchbox:
+  fn: "*_matchbox_counts.csv"
+  num_lines: 10

@@ -556,6 +556,7 @@ module_order:
   - sincei
   - ganon
   - gtdbtk
+  - matchbox
   # Alignment tool stats
   - bbmap
   - bismark
