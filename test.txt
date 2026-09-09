@@ -1,0 +1,15 @@
+multiqc /vast/projects/antibody_sequencing/leon_phd/preprocessing/results/ --force -m matchbox -m samtools --no-ai --no-report
+
+--ignore "*/combined_reads/*"
+--ignore "*/all/*"
+--no-ai
+--outdir /report
+
+#################
+- m for custom content?
+
+--profile-runtime
+
+extra_fn_clean_exts:
+  - ".myformat"
+  - "_processedFile"
