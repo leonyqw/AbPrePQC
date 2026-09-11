@@ -47,7 +47,7 @@ class MultiqcModule(BaseMultiqcModule):
         # Add riot summary to the general stats table
         self.riot_general_stats_table(riot_data)
 
-    def parse_riot(self, f) -> Dict[str, float]:
+    def parse_riot(self, f) -> Dict[str, int]:
         """Parse riot files"""
 
         file = csv.reader(f)
