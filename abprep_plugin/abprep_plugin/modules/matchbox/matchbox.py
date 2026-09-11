@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Union
 
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
@@ -25,7 +25,7 @@ class MultiqcModule(BaseMultiqcModule):
         )
 
         # Find and load any matchbox reports
-        matchbox_data: Dict[str, Dict[str, int]] = dict()
+        matchbox_data: Dict[str, Dict[str, Union[int, float]]] = dict()
         for f in self.find_log_files("matchbox"):
             s_name = f["s_name"]
             matchbox_data[s_name] = self.parse_matchbox(f["f"])
@@ -48,16 +48,20 @@ class MultiqcModule(BaseMultiqcModule):
         # Alignment Rate Plot
         # self.matchbox_alignment_plot()
 
-    def parse_matchbox(self, f) -> Dict[str, int]:
+    def parse_matchbox(self, f) -> Dict[str, Union[int, float]]:
         """Parse matchbox files"""
 
-        parsed_data = {}
+        parsed_data: Dict[str, Union[int, float]] = dict()
 
         for line in f.splitlines():
             s = line.strip().split(",")
 
             if s[0] != "value":
                 parsed_data[s[0]] = int(s[1])
+
+        recovery_percent = (parsed_data["heavy + lambda"] + parsed_data["heavy + kappa"]) / parsed_data["total reads"]
+
+        parsed_data["recovery_percent"] = recovery_percent
 
         return parsed_data
 
@@ -93,6 +97,12 @@ class MultiqcModule(BaseMultiqcModule):
             "total reads": {
                 "title": "Total reads",
                 "description": "Total number of reads parsed",
+                "min": 0,
+                "scale": "Blues",
+            },
+            "recovery_percent": {
+                "title": "Recovery Percent",
+                "description": "Percentage of reads that were successfully recovered",
                 "min": 0,
                 "scale": "Blues",
             },
