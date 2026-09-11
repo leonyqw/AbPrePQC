@@ -1,6 +1,6 @@
 import csv
 import logging
-from typing import Dict
+from typing import Dict, Union
 
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
@@ -26,7 +26,7 @@ class MultiqcModule(BaseMultiqcModule):
         )
 
         # Find and load any riot data
-        riot_data: Dict[str, Dict[str, int]] = dict()
+        riot_data: Dict[str, Dict[str, Union[int, float]]] = dict()
         for f in self.find_log_files("riot", filehandles=True):
             s_name = f["s_name"]
             riot_data[s_name] = self.parse_riot(f["f"])
@@ -47,7 +47,7 @@ class MultiqcModule(BaseMultiqcModule):
         # Add riot summary to the general stats table
         self.riot_general_stats_table(riot_data)
 
-    def parse_riot(self, f) -> Dict[str, int]:
+    def parse_riot(self, f) -> Dict[str, Union[int, float]]:
         """Parse riot files"""
 
         file = csv.reader(f)
