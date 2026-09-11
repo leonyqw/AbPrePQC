@@ -1,0 +1,68 @@
+# Title to use for the report.
+# title: "AbPreP MultiQC Report"
+
+module_order:
+  - "samtools"
+  - "matchbox"
+  - "riot"
+
+extra_fn_clean_exts:
+  - "_alignment_stats"
+  - "_matchbox_counts"
+  - "_flagstat"
+  - "_stats"
+
+# # Ignore these files / directories / paths when searching for logs
+# fn_ignore_files:
+#   - .DS_Store
+fn_ignore_dirs:
+  - combined_reads
+  - all
+# fn_ignore_paths:
+#   - "*/path/to/*_files/"
+
+# remove_sections:
+#   - samtools-stats
+#   - samtools-flagstat
+
+# custom_content:
+#   order:
+#     - first_cc_section
+#     - second_cc_section
+
+# # Hide other tables
+# table_columns_visible:
+#   "Samtools: stats":
+#     samtools_stats-error_rate: False
+
+# general_stats_columns:
+#   samtools:
+#     columns:
+#       raw_total_sequences:
+#         hidden: false
+#       reads_mapped:
+#         hidden: false
+#       reads_mapped_percent:
+#         hidden: false
+
+# skip_generalstats: true 
+
+read_count_multiplier: 1
+read_count_prefix: ""
+
+# # Custom data for read length
+# custom_data:
+#   read_lengths:
+#     file_format: "tsv"
+#     section_name: "Read length distribution"
+#     description: "This plot comes from files acommpanied by a multiqc_config.yaml file for configuration"
+#     plot_type: "boxplot"
+#     pconfig:
+#       id: "read_length_plot"
+#       title: "Read Length Distribution"
+#       xlab: "Read lengths (bp)"
+#       # ymax: 100
+#       # ymin: 0
+# sp: #search pattern
+#   read_lengths:
+#     fn: "*read_lengths.tsv"

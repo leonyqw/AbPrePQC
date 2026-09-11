@@ -1,4 +1,4 @@
-multiqc /vast/projects/antibody_sequencing/leon_phd/preprocessing/results/ --force -m matchbox -m samtools --no-ai --no-report
+multiqc /vast/projects/antibody_sequencing/leon_phd/preprocessing/results/ --force -m matchbox -m samtools --no-ai --no-report -c multiqc_config_abprep.yaml
 
 --ignore "*/combined_reads/*"
 --ignore "*/all/*"
