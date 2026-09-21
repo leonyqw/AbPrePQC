@@ -3,8 +3,9 @@ from typing import Dict, Union
 
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
-from multiqc.plots import bargraph, table
-from multiqc.plots.table_object import ColumnDict, ValueT
+from multiqc.plots import bargraph
+# , table
+# from multiqc.plots.table_object import ColumnDict, ValueT
 
 log = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
         # Initialise the parent object
         super().__init__(
-            name="matchbox",
+            name="Matchbox",
             anchor="matchbox",
             href="https://github.com/jakob-schuster/matchbox",
             info="Read processor that matches and transforms reads.",
@@ -32,6 +33,7 @@ class MultiqcModule(BaseMultiqcModule):
             if s_name in matchbox_data:
                 log.debug(f"Duplicate sample name found! Overwriting: {s_name}")
             self.add_data_source(f)
+
         # Report if no samples found
         if len(matchbox_data) == 0:
             raise ModuleNoSamplesFound
@@ -45,8 +47,8 @@ class MultiqcModule(BaseMultiqcModule):
         # Add matchbox summary to the general stats table
         self.matchbox_general_stats_table(matchbox_data)
 
-        # Alignment Rate Plot
-        # self.matchbox_alignment_plot()
+        # New section
+        self.matchbox_bar_plot(matchbox_data)
 
     def parse_matchbox(self, f) -> Dict[str, Union[int, float]]:
         """Parse matchbox files"""
@@ -110,22 +112,39 @@ class MultiqcModule(BaseMultiqcModule):
 
         self.general_stats_addcols(matchbox_data, headers)
 
-    # def matchbox_func1(self):
-    #     """Generate plot for the matchbox plot"""
+    def matchbox_bar_plot(self, matchbox_data):
+        """Generate plot for the matchbox plot"""
 
-    #     p_config = {"id": "mirtop_read_count_plot",
-    #                 "title": "mirtop: IsomiR read counts",
-    #                 "ylab": "Read counts"}
+        # Calculate proportions / difference so reads add up to the total read counts
+        matchbox_diff_counts_data: Dict[str, Dict[str, int]] = dict()
 
-    #     self.add_section(
-    #         name = "matchbox test section",
-    #         anchor = "matchbox test",
-    #         description = "Total counts of chains over all reads.",
-    #         helptext = """
-    #         Breakdown of total reads and heavy and light chains extracted.
-    #         """,
+        for barcode in list(matchbox_data):
+            if barcode not in matchbox_diff_counts_data:
+                matchbox_diff_counts_data[barcode] = {}
 
-    #         plot = bargraph.plot(self.filter_plot_data("sum"),
-    #                              self.get_plot_cats("sum"),
-    #                              p_config),
-    #     )
+            # Calculate the unique counts for each category so they are not cumulative and add up to the total read counts
+            matchbox_diff_counts_data[barcode]["heavy + lambda"] = matchbox_data[barcode]["heavy + lambda"]
+            matchbox_diff_counts_data[barcode]["heavy + kappa"] = matchbox_data[barcode]["heavy + kappa"]
+            matchbox_diff_counts_data[barcode]["heavy"] = matchbox_data[barcode]["heavy"] - (
+                matchbox_data[barcode]["heavy + kappa"] + matchbox_data[barcode]["heavy + lambda"]
+            )
+            matchbox_diff_counts_data[barcode]["rotated"] = (
+                matchbox_data[barcode]["rotated"] - matchbox_data[barcode]["heavy"]
+            )
+            matchbox_diff_counts_data[barcode]["total reads"] = (
+                matchbox_data[barcode]["total reads"] - matchbox_data[barcode]["rotated"]
+            )
+
+        # Assign the config for the plot
+        config = {"id": "individial_read_count_plot", "title": "Read counts per category", "xlab": "Barcode"}
+
+        # Add new section to plot the read counts per category
+        self.add_section(
+            name="Read counts per category",
+            anchor="matchbox",
+            description="Total counts of reads within each category, (non-cumulative).",
+            helptext="""
+            Breakdown of total reads and heavy and light chains extracted.
+            """,
+            plot=bargraph.plot(matchbox_diff_counts_data, pconfig=config),
+        )
