@@ -18,18 +18,20 @@ class MultiqcModule(BaseMultiqcModule):
     def __init__(self):
         # Initialise the parent object
         super().__init__(
-            name="riot",
+            name="RIOT",
             anchor="riot",
             href="https://pypi.org/project/riot-na/",
-            info="Rapid Immunoglobulin Overview Tool for antibody numbering.",
+            info="RIOT - Rapid Immunoglobulin Overview Tool for antibody numbering.",
             doi="https://doi.org/10.1093/bib/bbae632",
         )
 
         # Find and load any riot data
         riot_data: Dict[str, Dict[str, Union[int, float]]] = dict()
+
         for f in self.find_log_files("riot", filehandles=True):
-            s_name = f["s_name"]
-            riot_data[s_name] = self.parse_riot(f["f"])
+            s_name = f["s_name"].split("_")[0]
+            riot_data.setdefault(s_name, {}).update(self.parse_riot(f))
+
             if s_name in riot_data:
                 log.debug(f"Duplicate sample name found! Overwriting: {s_name}")
             self.add_data_source(f)
@@ -47,12 +49,16 @@ class MultiqcModule(BaseMultiqcModule):
         # Add riot summary to the general stats table
         self.riot_general_stats_table(riot_data)
 
+        # Add riot section to the report
+        self.riot_plot(riot_data)
+
     def parse_riot(self, f) -> Dict[str, Union[int, float]]:
         """Parse riot files"""
 
-        file = csv.reader(f)
+        file = csv.reader(f["f"])
         header = next(file)
         productive_idx = header.index("productive")
+        chain_type = f["s_name"].split("_")[2]
 
         productive_count = 0
         total = 0
@@ -64,63 +70,102 @@ class MultiqcModule(BaseMultiqcModule):
             total += 1
 
         return {
-            "productive": productive_count,
             "total": total,
-            "productive_percent": ((productive_count / total) * 100) if total > 0 else 0,
+            (chain_type + "_productive"): productive_count,
+            (chain_type + "_unproductive"): (total - productive_count),
+            (chain_type + "_productive_percent"): ((productive_count / total) * 100) if total > 0 else 0,
+            (chain_type + "_unproductive_percent"): 100 - (((productive_count / total) * 100) if total > 0 else 0),
         }
 
     def riot_general_stats_table(self, riot_data):
         """Take the parsed stats from the riot report and add it to the
         basic stats table at the top of the report"""
 
-        # Create new dictionary for barcode and productive counts
-        productive_data = {}
+        # # Create new dictionary for barcode and productive counts
+        # productive_data = {}
 
-        for sample_chain in riot_data:
-            barcode = sample_chain.split("_")[0]
+        # for sample_chain in riot_data:
+        #     barcode = sample_chain.split("_")[0]
 
-            if barcode not in productive_data:
-                productive_data[barcode] = {}
+        #     if barcode not in productive_data:
+        #         productive_data[barcode] = {}
 
-            if "heavy" in sample_chain:
-                productive_data[barcode]["productive_heavy"] = riot_data[sample_chain]["productive_percent"]
-            elif "light" in sample_chain:
-                productive_data[barcode]["productive_light"] = riot_data[sample_chain]["productive_percent"]
+        #     if "heavy" in sample_chain:
+        #         productive_data[barcode]["productive_heavy"] = riot_data[sample_chain]["productive_percent"]
+        #     elif "light" in sample_chain:
+        #         productive_data[barcode]["productive_light"] = riot_data[sample_chain]["productive_percent"]
 
         headers = {
-            "productive_heavy": {
+            "heavy_productive": {
                 "title": "Productive heavy chains",
                 "description": "Percentage of productive heavy chains",
                 "min": 0,
+                "suffix": "%",
                 "scale": "OrRd",
             },
-            "productive_light": {
+            "light_productive": {
                 "title": "Productive light chains",
                 "description": "Percentage of productive light chains",
                 "min": 0,
+                "suffix": "%",
                 "scale": "Greens",
             },
         }
 
-        self.general_stats_addcols(productive_data, headers)
+        self.general_stats_addcols(riot_data, headers)
 
+    def riot_plot(self, riot_data):
+        """Generate plot for the riot plot"""
 
-#     # def riot_func1(self):
-#     #     """Generate plot for the riot plot"""
+        p_config = {"id": "riot_productivity_plot", "title": "Riot TITLE", "xlab": "Read counts"}
 
-#     #     p_config = {"id": "mirtop_read_count_plot",
-#     #                 "title": "mirtop: IsomiR read counts",
-#     #                 "ylab": "Read counts"}
+        headers = {
+            "total": {
+                "title": "Total reads",
+                "description": "Total heavy and light chain pairs found",
+                "min": 0,
+                # "format": "{:,.0f}",  # No decimal places please
+            },
+            "heavy_productive": {
+                "title": "Productive heavy chains",
+                "description": "Total number of productive heavy chains found",
+                "min": 0,
+            },
+            "heavy_unproductive": {
+                "title": "Unproductive heavy chains",
+                "description": "Total number of unproductive heavy chains found",
+                "min": 0,
+            },
+            "heavy_productive_percent": {
+                "title": "Productive heavy chains (%)",
+                "description": "Percentage of productive heavy chains found",
+                "min": 0,
+                "suffix": "%",
+            },
+            "light_productive": {
+                "title": "Productive light chains",
+                "description": "Total number of productive light chains found",
+                "min": 0,
+            },
+            "light_unproductive": {
+                "title": "Unproductive light chains",
+                "description": "Total number of unproductive light chains found",
+                "min": 0,
+            },
+            "light_productive_percent": {
+                "title": "Productive light chains (%)",
+                "description": "Percentage of productive light chains found",
+                "min": 0,
+                "suffix": "%",
+            },
+        }
 
-#     #     self.add_section(
-#     #         name = "riot test section",
-#     #         anchor = "riot test",
-#     #         description = "Total counts of chains over all reads.",
-#     #         helptext = """
-#     #         Breakdown of total reads and heavy and light chains extracted.
-#     #         """,
-
-#     #         plot = bargraph.plot(self.filter_plot_data("sum"),
-#     #                              self.get_plot_cats("sum"),
-#     #                              p_config),
-#     #     )
+        self.add_section(
+            name="RIOT: productivity",
+            anchor="riot_productivity",
+            description="Number and percentage of productive heavy and light chains.",
+            helptext="""
+            Number and percentage of productive heavy and light chains (no stop codons).
+            """,
+            plot=table.plot(riot_data, headers=headers, pconfig=p_config),
+        )
