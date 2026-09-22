@@ -4,8 +4,7 @@ from typing import Dict, Union
 
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
-from multiqc.plots import bargraph, table
-from multiqc.plots.table_object import ColumnDict, ValueT
+from multiqc.plots import table
 
 log = logging.getLogger(__name__)
 

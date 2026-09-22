@@ -4,8 +4,6 @@ from typing import Dict, Union
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
 from multiqc.plots import bargraph
-# , table
-# from multiqc.plots.table_object import ColumnDict, ValueT
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +45,7 @@ class MultiqcModule(BaseMultiqcModule):
         # Add matchbox summary to the general stats table
         self.matchbox_general_stats_table(matchbox_data)
 
-        # New section
+        # Add matchbox section to the report
         self.matchbox_bar_plot(matchbox_data)
 
     def parse_matchbox(self, f) -> Dict[str, Union[int, float]]:
