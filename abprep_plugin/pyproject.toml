@@ -44,6 +44,7 @@ Repository = "https://github.com/AbPreP/abprep_plugin"
 [project.entry-points."multiqc.modules.v1"]
 matchbox = "abprep_plugin.modules.matchbox:MultiqcModule"
 riot = "abprep_plugin.modules.riot:MultiqcModule"
+read_length = "abprep_plugin.modules.read_length:MultiqcModule"
 
 [project.entry-points."multiqc.hooks.v1"]
 execution_start = "abprep_plugin.abprep_plugin:abprep_plugin_execution_start"

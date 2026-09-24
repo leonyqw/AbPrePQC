@@ -11,6 +11,7 @@ extra_fn_clean_exts:
   - "_matchbox_counts"
   - "_flagstat"
   - "_stats"
+  - "_read_lengths"
 
 # # Ignore these files / directories / paths when searching for logs
 # fn_ignore_files:
