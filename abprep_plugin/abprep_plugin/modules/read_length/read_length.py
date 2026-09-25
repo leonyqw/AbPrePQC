@@ -89,8 +89,8 @@ class MultiqcModule(BaseMultiqcModule):
             "showlegend": False,
             # "colors": self.get_status_cols("per_sequence_quality_scores"),
             "x_bands": [
-                {"from": 6000, "to": 10000, "color": "#009500", "opacity": 0.13},
-                # {"from": 20, "to": 28, "color": "#a07300", "opacity": 0.13},
+                {"from": 4000, "to": 6000, "color": "#009500", "opacity": 0.13},
+                {"from": 7000, "to": 9000, "color": "#a07300", "opacity": 0.13},
                 # {"from": 0, "to": 20, "color": "#990101", "opacity": 0.13},
             ],
         }
