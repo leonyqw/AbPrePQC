@@ -95,14 +95,14 @@ class MultiqcModule(BaseMultiqcModule):
         #         productive_data[barcode]["productive_light"] = riot_data[sample_chain]["productive_percent"]
 
         headers = {
-            "heavy_productive": {
+            "heavy_productive_percent": {
                 "title": "Productive heavy chains",
                 "description": "Percentage of productive heavy chains",
                 "min": 0,
                 "suffix": "%",
                 "scale": "OrRd",
             },
-            "light_productive": {
+            "light_productive_percent": {
                 "title": "Productive light chains",
                 "description": "Percentage of productive light chains",
                 "min": 0,
@@ -124,38 +124,46 @@ class MultiqcModule(BaseMultiqcModule):
                 "description": "Total heavy and light chain pairs found",
                 "min": 0,
                 # "format": "{:,.0f}",  # No decimal places please
+                "scale": "Blues",
+                # "bars_zero_centrepoint": True,
             },
             "heavy_productive": {
                 "title": "Productive heavy chains",
                 "description": "Total number of productive heavy chains found",
                 "min": 0,
+                "scale": "Oranges",
             },
             "heavy_unproductive": {
                 "title": "Unproductive heavy chains",
                 "description": "Total number of unproductive heavy chains found",
                 "min": 0,
+                "scale": "Oranges",
             },
             "heavy_productive_percent": {
                 "title": "Productive heavy chains (%)",
                 "description": "Percentage of productive heavy chains found",
                 "min": 0,
                 "suffix": "%",
+                "scale": "Oranges",
             },
             "light_productive": {
                 "title": "Productive light chains",
                 "description": "Total number of productive light chains found",
                 "min": 0,
+                "scale": "Greens",
             },
             "light_unproductive": {
                 "title": "Unproductive light chains",
                 "description": "Total number of unproductive light chains found",
                 "min": 0,
+                "scale": "Greens",
             },
             "light_productive_percent": {
                 "title": "Productive light chains (%)",
                 "description": "Percentage of productive light chains found",
                 "min": 0,
                 "suffix": "%",
+                "scale": "Greens",
             },
         }
 
