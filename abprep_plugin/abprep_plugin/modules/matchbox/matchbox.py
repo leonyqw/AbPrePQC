@@ -59,7 +59,9 @@ class MultiqcModule(BaseMultiqcModule):
             if s[0] != "value":
                 parsed_data[s[0]] = int(s[1])
 
-        recovery_percent = (parsed_data["heavy + lambda"] + parsed_data["heavy + kappa"]) / parsed_data["total reads"]
+        recovery_percent = (
+            (parsed_data["heavy + lambda"] + parsed_data["heavy + kappa"]) / parsed_data["total reads"]
+        ) * 100
 
         parsed_data["recovery_percent"] = recovery_percent
 
@@ -75,35 +77,42 @@ class MultiqcModule(BaseMultiqcModule):
                 "description": "Number of heavy chains found",
                 "min": 0,
                 "scale": "OrRd",
+                "hidden": "true",
             },
             "heavy + kappa": {
                 "title": "Heavy + kappa light chains",
                 "description": "Number of heavy and kappa light chains found",
                 "min": 0,
                 "scale": "Greens",
+                "hidden": "true",
             },
             "heavy + lambda": {
                 "title": "Heavy + lambda light chains",
                 "description": "Number of heavy and lambda light chains found",
                 "min": 0,
                 "scale": "Greens",
+                "hidden": "true",
             },
             "rotated": {
                 "title": "Reads rotated",
                 "description": "Number of reads that have been rotated",
                 "min": 0,
                 "scale": "BuPu",
+                "hidden": "true",
             },
             "total reads": {
                 "title": "Total reads",
                 "description": "Total number of reads parsed",
                 "min": 0,
                 "scale": "Blues",
+                "hidden": "true",
             },
             "recovery_percent": {
                 "title": "Recovery Percent",
                 "description": "Percentage of reads that were successfully recovered",
                 "min": 0,
+                "suffix": "%",
+                # "format": "{:.2f}%",
                 "scale": "Blues",
             },
         }
@@ -133,6 +142,14 @@ class MultiqcModule(BaseMultiqcModule):
                 matchbox_data[barcode]["total reads"] - matchbox_data[barcode]["rotated"]
             )
 
+        cats = {
+            "heavy + lambda": {"name": "Both heavy + lambda chains found", "color": "#CAEEEC"},
+            "heavy + kappa": {"name": "Both heavy + kappa chains found", "color": "#E8F0FF"},
+            "heavy": {"name": "Heavy chains only found", "color": "#CBEDB1"},
+            "rotated": {"name": "Rotated reads only", "color": "#FFCBAE"},
+            "total reads": {"name": "Unrotated reads", "color": "#E5CFC2"},
+        }
+
         # Assign the config for the plot
         config = {"id": "individial_read_count_plot", "title": "Read counts per category", "xlab": "Barcode"}
 
@@ -144,5 +161,5 @@ class MultiqcModule(BaseMultiqcModule):
             helptext="""
             Breakdown of total reads and heavy and light chains extracted.
             """,
-            plot=bargraph.plot(matchbox_diff_counts_data, pconfig=config),
+            plot=bargraph.plot(matchbox_diff_counts_data, cats=cats, pconfig=config),
         )
