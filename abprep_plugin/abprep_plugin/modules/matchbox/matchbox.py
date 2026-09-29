@@ -108,8 +108,8 @@ class MultiqcModule(BaseMultiqcModule):
                 "hidden": "true",
             },
             "recovery_percent": {
-                "title": "Recovery Percent",
-                "description": "Percentage of reads that were successfully recovered",
+                "title": "% Recovery",
+                "description": "Percentage of reads with a heavy and light chain recovered out of the total reads",
                 "min": 0,
                 "suffix": "%",
                 # "format": "{:.2f}%",

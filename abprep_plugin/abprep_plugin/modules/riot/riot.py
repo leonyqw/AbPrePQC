@@ -96,14 +96,14 @@ class MultiqcModule(BaseMultiqcModule):
 
         headers = {
             "heavy_productive_percent": {
-                "title": "Productive heavy chains",
+                "title": "% Productive H chains",
                 "description": "Percentage of productive heavy chains",
                 "min": 0,
                 "suffix": "%",
                 "scale": "OrRd",
             },
             "light_productive_percent": {
-                "title": "Productive light chains",
+                "title": "% Productive L chains",
                 "description": "Percentage of productive light chains",
                 "min": 0,
                 "suffix": "%",
@@ -121,45 +121,45 @@ class MultiqcModule(BaseMultiqcModule):
         headers = {
             "total": {
                 "title": "Total reads",
-                "description": "Total heavy and light chain pairs found",
+                "description": "Total number of heavy and light chain pairs found",
                 "min": 0,
                 # "format": "{:,.0f}",  # No decimal places please
                 "scale": "Blues",
                 # "bars_zero_centrepoint": True,
             },
             "heavy_productive": {
-                "title": "Productive heavy chains",
+                "title": "Productive H chains",
                 "description": "Total number of productive heavy chains found",
                 "min": 0,
                 "scale": "Oranges",
             },
             "heavy_unproductive": {
-                "title": "Unproductive heavy chains",
+                "title": "Unproductive H chains",
                 "description": "Total number of unproductive heavy chains found",
                 "min": 0,
                 "scale": "Oranges",
             },
             "heavy_productive_percent": {
-                "title": "Productive heavy chains (%)",
+                "title": "% Productive H chains",
                 "description": "Percentage of productive heavy chains found",
                 "min": 0,
                 "suffix": "%",
                 "scale": "Oranges",
             },
             "light_productive": {
-                "title": "Productive light chains",
+                "title": "Productive L chains",
                 "description": "Total number of productive light chains found",
                 "min": 0,
                 "scale": "Greens",
             },
             "light_unproductive": {
-                "title": "Unproductive light chains",
+                "title": "Unproductive L chains",
                 "description": "Total number of unproductive light chains found",
                 "min": 0,
                 "scale": "Greens",
             },
             "light_productive_percent": {
-                "title": "Productive light chains (%)",
+                "title": "% Productive L chains",
                 "description": "Percentage of productive light chains found",
                 "min": 0,
                 "suffix": "%",
@@ -172,7 +172,7 @@ class MultiqcModule(BaseMultiqcModule):
             anchor="riot_productivity",
             description="Number and percentage of productive heavy and light chains.",
             helptext="""
-            Number and percentage of productive heavy and light chains (no stop codons).
+            Number and percentage of productive (no stop codons) and unproductive heavy and light chains.
             """,
             plot=table.plot(riot_data, headers=headers, pconfig=p_config),
         )

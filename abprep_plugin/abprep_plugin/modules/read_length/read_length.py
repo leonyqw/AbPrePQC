@@ -20,7 +20,7 @@ class MultiqcModule(BaseMultiqcModule):
         super().__init__(
             name="Read length",
             anchor="read_length",
-            info="Comparison of read lengths across samples.",
+            info="Comparison of read lengths across samples. Read lengths are obtained from the samtools stats output.",
         )
 
         # Find and load any read_length reports
@@ -59,7 +59,7 @@ class MultiqcModule(BaseMultiqcModule):
 
     def read_length_plots(self, read_len_data):
         """
-        Read length distribution per sample, with a toggle between read counts and bases per length bin.
+        Read length distribution per sample.
         Weighted histogram plot adapted from NanoComp.
         """
         # Drop zero-length reads and samples left empty
@@ -87,12 +87,7 @@ class MultiqcModule(BaseMultiqcModule):
             "xlab": "Read length (bp)",
             "ymin": 0,
             "xmin": 0,
-            "showlegend": False,
-            "style": "lines+markers",
-            "x_bands": [
-                {"from": 4000, "to": 6000, "color": "#009500", "opacity": 0.13},
-                {"from": 7000, "to": 9000, "color": "#a07300", "opacity": 0.13},
-            ],
+            # "showlegend": False,
             "data_labels": [
                 {"name": "Bases", "ylab": "Number of bases", "tt_label": "<b>~%{x:,.0f} bp</b>: %{y:,.0f} bases"},
                 {"name": "Reads", "ylab": "Number of reads", "tt_label": "<b>~%{x:,.0f} bp</b>: %{y:,.0f} reads"},
@@ -103,17 +98,14 @@ class MultiqcModule(BaseMultiqcModule):
         self.add_section(
             name="Read length distribution",
             anchor="read_length_plot",
-            description="Number of reads / bases per sample.",
+            description="Distribution of the number of reads / bases per sample.",
             helptext="""
-            Each line is one sample. Reads are placed into equal size bins.
+            Each line is one sample. Reads are placed into evenly spaced and equal sized bins.
             Use the buttons above the plot to switch views.
 
-            **Bases**: Every read adds its own length to its bin instead of a count
-            of 1, so the y-axis shows how many sequenced bases fall in each bin.
-            This shows where most of the data is, which the read count view hides
-            because short reads dominate by number.
+            **Bases**: Every read adds the number of bases to its read length bin. The y-axis is the total number of bases that fall in each read length bin.
 
-            **Reads**: The y-axis is the number of reads in each length bin.
+            **Reads**: The y-axis is the number of reads in each read length bin.
             """,
             plot=linegraph.plot([bases_by_sample, reads_by_sample], pconfig),
         )
