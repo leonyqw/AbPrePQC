@@ -48,8 +48,6 @@ class MultiqcModule(BaseMultiqcModule):
         # Replace None with actual version if it is available
         self.add_software_version(None)
 
-        # self.read_length_violin_plot(read_len_data)
-
         self.read_length_plots(read_len_data)
 
     def parse_read_length(self, f) -> List[int]:
@@ -58,70 +56,6 @@ class MultiqcModule(BaseMultiqcModule):
         parsed_data = [int(x) for x in f.split("\n") if x.strip()]
 
         return parsed_data
-
-    def read_length_violin_plot(self, read_len_data):
-        """Generate an interactive violin plot of read lengths per sample"""
-
-        # log10-transform (drop zero-length reads: log10(0) is undefined)
-        lengths = {
-            s_name: np.log10(v[v > 0])
-            for s_name, v in ((s_name, np.asarray(vals, dtype=np.int64)) for s_name, vals in read_len_data.items())
-        }
-
-        # Create plot
-        fig = go.Figure()
-        for s_name, vals in lengths.items():
-            fig.add_trace(
-                go.Violin(
-                    x=[s_name] * len(vals),
-                    y=vals,
-                    name=s_name,
-                    points=False,
-                    spanmode="hard",
-                )
-            )
-
-        # Ticks at powers of 10, labelled as real read lengths
-        lo = int(np.floor(min(v.min() for v in lengths.values())))
-        hi = int(np.ceil(max(v.max() for v in lengths.values())))
-        ticks = list(range(lo, hi + 1))
-
-        # Update plot layout
-        fig.update_layout(
-            showlegend=False,
-            autosize=True,
-            height=520,
-            yaxis=dict(
-                title="Log-transformed read length",
-                tickvals=ticks,
-                ticktext=[f"{10**t:,}" for t in ticks],
-            ),
-            margin=dict(l=60, r=20, t=30, b=60),
-        )
-
-        # Only the download button in the modebar
-        config = {
-            "displaylogo": False,
-            "responsive": True,
-            "toImageButtonOptions": {
-                "format": "svg",  # or "png"
-                "filename": "read_length_violin",
-                "scale": 2,
-            },
-        }
-
-        # Add plot section to the report
-        self.add_section(
-            name="Read length distribution by barcode",
-            anchor="barcode_readlen_violin",
-            description="Violin plot of log-transformed read lengths per barcode.",
-            content=fig.to_html(
-                full_html=False,
-                include_plotlyjs=False,  # MultiQC report already loads plotly.js
-                div_id="barcode_readlen_violin_plot",
-                config=config,
-            ),
-        )
 
     def read_length_plots(self, read_len_data):
         """
