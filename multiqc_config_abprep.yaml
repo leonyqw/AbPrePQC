@@ -53,6 +53,9 @@ table_columns_placement:
 read_count_multiplier: 1
 read_count_prefix: ""
 
+# Increase file size limit
+log_filesize_limit: 5000000000
+
 custom_plot_config:
   samtools_alignment_plot:
     title: "Samtools: Alignment Scores"
