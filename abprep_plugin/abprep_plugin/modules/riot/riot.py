@@ -1,9 +1,7 @@
 import logging
-from unittest import result
 import pandas as pd
-from typing import Dict, List, Union
+from typing import List
 import hashlib
-import colorsys
 
 # from multiqc import config
 from multiqc.base_module import BaseMultiqcModule, ModuleNoSamplesFound
@@ -209,16 +207,7 @@ class MultiqcModule(BaseMultiqcModule):
     def riot_v_gene_plots(self, riot_data):
         """Generate heat map for v gene pairing"""
 
-        # TODO delete this code here
-        # # Find which combinations are duplicated
-        # dupes = riot_data[riot_data.duplicated(subset=["sequence_header", "barcode", "chain"], keep=False)]
-        # print(dupes.sort_values(["sequence_header", "barcode", "chain"]))
-        # print(f"Duplicate count: {len(dupes)}")
-
-        # TODO only filter for productive heavy and light chains?
-
         # Pair up light and heavy chains by sequence header
-        # TODO Check reverse complement / currently taking first chain found
         riot_data = riot_data.drop_duplicates(subset=["sequence_header", "barcode", "chain"], keep="first")
         riot_wide_data = riot_data.pivot(index=["sequence_header", "barcode"], columns=["chain"], values=["v_call"])
 
@@ -345,6 +334,7 @@ class MultiqcModule(BaseMultiqcModule):
         g = max(50, min(210, g))
         b = max(50, min(210, b))
 
+        # TODO delete useless code
         # # Map 0-255 into a lighter range, e.g. 100-220
         # def lighten(col):
         #     return 50 + int(col / 127.5 * 100)
