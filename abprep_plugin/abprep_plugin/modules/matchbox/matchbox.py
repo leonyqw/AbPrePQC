@@ -28,6 +28,7 @@ class MultiqcModule(BaseMultiqcModule):
         for f in self.find_log_files("matchbox"):
             s_name = f["s_name"]
             matchbox_data[s_name] = self.parse_matchbox(f["f"])
+
             if s_name in matchbox_data:
                 log.debug(f"Duplicate sample name found! Overwriting: {s_name}")
             self.add_data_source(f)
