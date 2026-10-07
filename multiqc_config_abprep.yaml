@@ -1,5 +1,17 @@
-# Title to use for the report.
-# title: "AbPreP MultiQC Report"
+# Title to use for the report
+title: "AbPreP"
+subtitle: "Antibody preprocessing pipeline QC report"
+intro_text: |
+  This QC report was created with MultiQC and summarises the outputs from AbPreP for fast QC checking of samples obtained from Oxford Nanopore long read sequencing.
+  <br><br>
+  Four main issues are checked:
+  <ol>
+    <li>Contamination (e.g. of gDNA or other plasmids)</li>
+    <li>Read length (to ensure VH-VL pairing is recoverable)</li>
+    <li>Productivity (percentage of reads without frameshifts or premature stop codons)</li>
+    <li>V gene composition and pairing</li>
+  </ol>
+# report_comment: "This is a comment about this report."
 
 # Set module order
 module_order:
@@ -33,16 +45,16 @@ general_stats_columns:
     columns:
       error_rate:
         hidden: true
-      non_primary_alignments:
-        hidden: true
-      mapped_passed:
-        hidden: true
+        scale: "Purples"
       raw_total_sequences:
         hidden: false
+        scale: "Purples"
       reads_mapped:
         hidden: false
+        scale: "Purples"
       reads_mapped_percent:
         hidden: false
+        scale: "Purples"
 
 # Reorder column table placements
 table_columns_placement:
@@ -52,10 +64,32 @@ table_columns_placement:
 # Modify read count format
 read_count_multiplier: 1
 read_count_prefix: ""
+read_count_desc: "reads"
 
 # Increase file size limit
 log_filesize_limit: 5000000000
 
+# Customise plot title
 custom_plot_config:
   samtools_alignment_plot:
     title: "Samtools: Alignment Scores"
+    cpswitch_c_active: false
+    reads_mapped_MQ1:
+      color: "#D1DCF3"
+    reads_MQ0:
+      color: "#DECDF9"
+    reads_unmapped:
+      color: "#F8BAC9"
+
+# Change plot font size
+plots_export_font_scale: 4
+
+# Stop AI content
+no_ai: true
+
+# Stop MultiQC from outputting the data again
+make_data_dir: false
+
+# Add additional comment to samtools section
+section_comments:
+  samtools-stats-alignment: "Samtools aligns the reads to the phagemid reference plasmid. Low % alignment (unmapped) may indicate contamination."

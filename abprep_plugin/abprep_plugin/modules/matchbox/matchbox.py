@@ -41,7 +41,7 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Superfluous function call to confirm that it is used in this module
         # Replace None with actual version if it is available
-        self.add_software_version(None)
+        self.add_software_version("0.3.2")
 
         # Add matchbox summary to the general stats table
         self.matchbox_general_stats_table(matchbox_data)
@@ -144,21 +144,32 @@ class MultiqcModule(BaseMultiqcModule):
             )
 
         cats = {
-            "heavy + lambda": {"name": "Both heavy + lambda chains found", "color": "#CAEEEC"},
-            "heavy + kappa": {"name": "Both heavy + kappa chains found", "color": "#E8F0FF"},
-            "heavy": {"name": "Heavy chains only found", "color": "#CBEDB1"},
+            "heavy + lambda": {"name": "Heavy + lambda chains found", "color": "#CAEEEC"},
+            "heavy + kappa": {"name": "Heavy + kappa chains found", "color": "#E8F0FF"},
+            "heavy": {"name": "Heavy chains only", "color": "#CBEDB1"},
             "rotated": {"name": "Rotated reads only", "color": "#FFCBAE"},
             "total reads": {"name": "Unrotated reads", "color": "#E5CFC2"},
         }
 
         # Assign the config for the plot
-        config = {"id": "individial_read_count_plot", "title": "Read counts per category", "xlab": "Barcode"}
+        config = {
+            "id": "individial_read_count_plot",
+            "title": "Read counts per category",
+            "xlab": "Barcode",
+            "tt_decimals": 0,
+            "tt_suffix": " reads",
+            "cpswitch_c_active": False,
+        }
 
         # Add new section to plot the read counts per category
         self.add_section(
-            name="Read counts per category",
+            name="Matchbox: Read counts per category",
             anchor="matchbox",
-            description="Total counts of reads within each category, (non-cumulative).",
+            description="""
+            Total counts of reads within each category, (non-cumulative).
+
+            Samples with low proportion of heavy + kappa or heavy + lambda chains may indicate no VH-VL pairing was recovered, or that the sample is contaminated with other plasmids or gDNA.
+            """,
             helptext="""
             Breakdown of total reads and heavy and light chains extracted.
             """,

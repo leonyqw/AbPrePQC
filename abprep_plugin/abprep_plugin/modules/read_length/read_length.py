@@ -87,7 +87,6 @@ class MultiqcModule(BaseMultiqcModule):
             "xlab": "Read length (bp)",
             "ymin": 0,
             "xmin": 0,
-            # "showlegend": False,
             "data_labels": [
                 {"name": "Bases", "ylab": "Number of bases", "tt_label": "<b>~%{x:,.0f} bp</b>: %{y:,.0f} bases"},
                 {"name": "Reads", "ylab": "Number of reads", "tt_label": "<b>~%{x:,.0f} bp</b>: %{y:,.0f} reads"},
@@ -98,7 +97,11 @@ class MultiqcModule(BaseMultiqcModule):
         self.add_section(
             name="Read length distribution",
             anchor="read_length_plot",
-            description="Distribution of the number of reads / bases per sample.",
+            description="""
+            Distribution of the number of reads / bases per sample.
+
+            A good sample should have one big peak around the expected full length of the plasmid.
+            """,
             helptext="""
             Each line is one sample. Reads are placed into evenly spaced and equal sized bins.
             Use the buttons above the plot to switch views.
