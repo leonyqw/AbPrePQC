@@ -13,6 +13,8 @@ intro_text: |
   </ol>
 # report_comment: "This is a comment about this report."
 
+custom_logo: "/home/users/allstaff/wang.leo/antibody_projects/leon_phd/AbPrePQC/WEHI_logo.svg"
+
 # Set module order
 module_order:
   - "samtools"
@@ -47,6 +49,8 @@ general_stats_columns:
         hidden: true
         scale: "Purples"
       raw_total_sequences:
+        title: "Total Reads"
+        description: "Total number of reads in the sample"
         hidden: false
         scale: "Purples"
       reads_mapped:
@@ -93,3 +97,12 @@ make_data_dir: false
 # Add additional comment to samtools section
 section_comments:
   samtools-stats-alignment: "Samtools aligns the reads to the phagemid reference plasmid. Low % alignment (unmapped) may indicate contamination."
+
+# Flag low productive percentage from riot module
+table_cond_formatting_rules:
+  riot-productive_perc_vh_vl:
+      warn:
+      - lt: 10
+  productive_perc_vh_vl:
+    warn:
+      - lt: 10

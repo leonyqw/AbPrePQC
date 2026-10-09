@@ -112,6 +112,7 @@ class MultiqcModule(BaseMultiqcModule):
                 "title": "% Recovery",
                 "description": "Percentage of reads with a heavy and light chain recovered out of the total reads",
                 "min": 0,
+                "max": 100,
                 "suffix": "%",
                 # "format": "{:.2f}%",
                 "scale": "Blues",
