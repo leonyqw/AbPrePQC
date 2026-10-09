@@ -9,9 +9,8 @@ intro_text: |
     <li>Contamination (e.g. of gDNA or other plasmids)</li>
     <li>Read length (to ensure VH-VL pairing is recoverable)</li>
     <li>Productivity (percentage of reads without frameshifts or premature stop codons)</li>
-    <li>V gene composition and pairing</li>
+    <li>V gene composition and VH-VL pairing</li>
   </ol>
-# report_comment: "This is a comment about this report."
 
 custom_logo: "/home/users/allstaff/wang.leo/antibody_projects/leon_phd/AbPrePQC/WEHI_logo.svg"
 
