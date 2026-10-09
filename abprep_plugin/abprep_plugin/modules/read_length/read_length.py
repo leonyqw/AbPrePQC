@@ -97,11 +97,8 @@ class MultiqcModule(BaseMultiqcModule):
         self.add_section(
             name="Read length distribution",
             anchor="read_length_plot",
-            description="""
-            Distribution of the number of reads / bases per sample.
-
-            A good sample should have one big peak around the expected full length of the plasmid.
-            """,
+            description="Distribution of the number of reads / bases per sample.",
+            comment="A good sample should have one big peak around the expected full length of the plasmid.",
             helptext="""
             Each line is one sample. Reads are placed into evenly spaced and equal sized bins.
             Use the buttons above the plot to switch views.

@@ -165,11 +165,8 @@ class MultiqcModule(BaseMultiqcModule):
         self.add_section(
             name="Matchbox: Read counts per category",
             anchor="matchbox",
-            description="""
-            Total counts of reads within each category, (non-cumulative).
-
-            Samples with low proportion of heavy + kappa or heavy + lambda chains may indicate no VH-VL pairing was recovered, or that the sample is contaminated with other plasmids or gDNA.
-            """,
+            description="Total counts of reads within each category, (non-cumulative).",
+            comment="Samples with low proportion of heavy + kappa or heavy + lambda chains may indicate no VH-VL pairing was recovered, or that the sample is contaminated with other plasmids or gDNA.",
             helptext="""
             Breakdown of total reads and heavy and light chains extracted.
             """,

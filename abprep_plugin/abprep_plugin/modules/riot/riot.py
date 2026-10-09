@@ -52,9 +52,33 @@ class MultiqcModule(BaseMultiqcModule):
 
         # Superfluous function call to confirm that it is used in this module
         # Replace None with actual version if it is available
-        self.add_software_version(None)
+        self.add_software_version("4.0.2")
 
-        riot_data_summary = self.summarise_data(riot_data)
+        # Remove duplicate sequence headers
+        riot_data = riot_data.drop_duplicates(subset=["sequence_header", "barcode", "chain"], keep="first")
+
+        # Join data by sequence header to pair heavy and light chains together for each read
+        riot_wide_data = riot_data.pivot(
+            index=["sequence_header", "barcode"], columns=["chain"], values=["v_call", "productive"]
+        )
+
+        # Rename columns
+        riot_wide_data.columns = pd.MultiIndex.from_tuples(
+            [
+                ("v_call", "v_heavy"),
+                ("v_call", "v_light"),
+                ("productive", "prod_heavy"),
+                ("productive", "prod_light"),
+            ]
+        )
+        riot_wide_data.columns = riot_wide_data.columns.droplevel(0)
+        riot_wide_data = riot_wide_data.reset_index()
+
+        # Create new column (True / False) if read has both productive heavy and light chains
+        riot_wide_data["prod_vh_vl"] = riot_wide_data["prod_heavy"] & riot_wide_data["prod_light"]
+
+        # Summarise riot data
+        riot_data_summary = self.summarise_data(riot_wide_data)
 
         # Add riot summary to the general stats table
         self.riot_general_stats_table(riot_data_summary)
@@ -63,33 +87,7 @@ class MultiqcModule(BaseMultiqcModule):
         self.riot_summary_table(riot_data_summary)
 
         # Add riot V gene heat map to the report
-        self.riot_v_gene_plots(riot_data)
-
-    def summarise_data(self, riot_data):
-        """Summarise riot data"""
-
-        # Aggregate the data by barcode and chain
-        riot_agg_data = riot_data.groupby(["barcode", "chain"]).agg(
-            total=("sequence_header", "count"),
-            productive=("productive", lambda x: (x).sum()),
-            unique_v_genes=("v_call", lambda x: (x.nunique())),
-        )
-
-        # Calculate unproductive and productive percent
-        riot_agg_data["unproductive"] = riot_agg_data["total"] - riot_agg_data["productive"]
-        riot_agg_data["productive_percent"] = (riot_agg_data["productive"] / riot_agg_data["total"]) * 100
-        riot_agg_data.reset_index(level="chain", inplace=True)
-
-        # Summarise the riot data
-        riot_data_summary = {}
-
-        for barcode, group in riot_agg_data.groupby("barcode"):
-            riot_data_summary[barcode] = {}
-            for chain, row in group.set_index("chain").iterrows():
-                for col, val in row.items():
-                    riot_data_summary[barcode][f"{chain}_{col}"] = val
-
-        return riot_data_summary
+        self.riot_v_gene_plots(riot_wide_data)
 
     def parse_riot(self, f):
         """Parse riot files"""
@@ -100,21 +98,48 @@ class MultiqcModule(BaseMultiqcModule):
 
         return df
 
+    def summarise_data(self, riot_data):
+        """Summarise riot data"""
+
+        # Aggregate the data by barcode
+        riot_agg_data = riot_data.groupby(["barcode"]).agg(
+            total=("sequence_header", "count"),
+            productive_vh_vl=("prod_vh_vl", lambda x: (x).sum()),
+            productive_heavy=("prod_heavy", lambda x: (x).sum()),
+            unique_vh_genes=("v_heavy", lambda x: (x.nunique())),
+            productive_light=("prod_light", lambda x: (x).sum()),
+            unique_vl_genes=("v_light", lambda x: (x.nunique())),
+        )
+
+        # Calculate unproductive and productive percent
+        riot_agg_data["unproductive_heavy"] = riot_agg_data["total"] - riot_agg_data["productive_heavy"]
+        riot_agg_data["unproductive_light"] = riot_agg_data["total"] - riot_agg_data["productive_light"]
+        riot_agg_data["productive_perc_heavy"] = (riot_agg_data["productive_heavy"] / riot_agg_data["total"]) * 100
+        riot_agg_data["productive_perc_light"] = (riot_agg_data["productive_light"] / riot_agg_data["total"]) * 100
+        riot_agg_data["productive_perc_vh_vl"] = (riot_agg_data["productive_vh_vl"] / riot_agg_data["total"]) * 100
+
+        # Summarise the riot data
+        riot_data_summary = {}
+        for barcode, row in riot_agg_data.iterrows():
+            riot_data_summary[barcode] = row.to_dict()
+
+        return riot_data_summary
+
     def riot_general_stats_table(self, riot_data_summary):
         """Take the parsed summarised riot data and add it to the
         basic stats table at the top of the report"""
 
         headers = {
-            "heavy_productive_percent": {
-                "title": "% Productive H chains",
-                "description": "Percentage of productive heavy chains",
+            "total": {
+                "title": "Total VH and VL pairs",
+                "description": "Total number of heavy and light chain pairs found",
                 "min": 0,
                 "suffix": "%",
-                "scale": "OrRd",
+                "scale": "Greens",
             },
-            "light_productive_percent": {
-                "title": "% Productive L chains",
-                "description": "Percentage of productive light chains",
+            "productive_perc_vh_vl": {
+                "title": "% Productive VH and VL pairs",
+                "description": "Percentage of productive heavy and light chain pairs",
                 "min": 0,
                 "suffix": "%",
                 "scale": "Greens",
@@ -126,66 +151,80 @@ class MultiqcModule(BaseMultiqcModule):
     def riot_summary_table(self, riot_data_summary):
         """Generate riot data table"""
 
-        p_config = {"id": "riot_productivity_plot", "title": "Riot TITLE", "xlab": "Read counts"}
+        p_config = {"id": "riot_productivity_plot", "title": "RIOT: Productivity", "xlab": "Read counts"}
 
         headers = {
             "total": {
-                "title": "Total reads",
+                "title": "Total VH-VL pairs",
                 "description": "Total number of heavy and light chain pairs found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Blues",
             },
-            "heavy_productive": {
-                "title": "Productive H chains",
+            "prod_vh_vl": {
+                "title": "Productive VH-VL pairs",
+                "description": "Total number of productive heavy and light chain pairs found",
+                "min": 0,
+                "format": "{:,.0f}",
+                "scale": "Blues",
+            },
+            "productive_perc_vh_vl": {
+                "title": "% Productive VH-VL pairs",
+                "description": "Percentage of productive heavy and light chain pairs found",
+                "min": 0,
+                "suffix": "%",
+                "scale": "Blues",
+            },
+            "productive_heavy": {
+                "title": "Productive VH chains",
                 "description": "Total number of productive heavy chains found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Oranges",
             },
-            "heavy_unproductive": {
-                "title": "Unproductive H chains",
+            "unproductive_heavy": {
+                "title": "Unproductive VH chains",
                 "description": "Total number of unproductive heavy chains found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Oranges",
             },
-            "heavy_productive_percent": {
-                "title": "% Productive H chains",
+            "productive_perc_heavy": {
+                "title": "% Productive VH chains",
                 "description": "Percentage of productive heavy chains found",
                 "min": 0,
                 "suffix": "%",
                 "scale": "Oranges",
             },
-            "heavy_unique_v_genes": {
+            "unique_vh_genes": {
                 "title": "Unique VH genes",
                 "description": "Number of unique variable heavy genes found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Oranges",
             },
-            "light_productive": {
-                "title": "Productive L chains",
+            "productive_light": {
+                "title": "Productive VL chains",
                 "description": "Total number of productive light chains found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Greens",
             },
-            "light_unproductive": {
-                "title": "Unproductive L chains",
+            "unproductive_light": {
+                "title": "Unproductive VL chains",
                 "description": "Total number of unproductive light chains found",
                 "min": 0,
                 "format": "{:,.0f}",
                 "scale": "Greens",
             },
-            "light_productive_percent": {
-                "title": "% Productive L chains",
+            "productive_perc_light": {
+                "title": "% Productive VL chains",
                 "description": "Percentage of productive light chains found",
                 "min": 0,
                 "suffix": "%",
                 "scale": "Greens",
             },
-            "light_unique_v_genes": {
+            "unique_vl_genes": {
                 "title": "Unique VL genes",
                 "description": "Number of unique variable light genes found",
                 "min": 0,
@@ -195,40 +234,36 @@ class MultiqcModule(BaseMultiqcModule):
         }
 
         self.add_section(
-            name="RIOT: productivity",
+            name="RIOT: Productivity",
             anchor="riot_productivity",
-            description="Number and percentage of productive heavy and light chains.",
+            description="Number and percentage of productive heavy and light chains, and unique V genes identified.",
+            comment="Low productive % may be due to sequencing error.",
             helptext="""
             Number and percentage of productive (no stop codons) and unproductive heavy and light chains.
             """,
             plot=table.plot(riot_data_summary, headers=headers, pconfig=p_config),
         )
 
-    def riot_v_gene_plots(self, riot_data):
+    def riot_v_gene_plots(self, riot_wide_data):
         """Generate heat map for v gene pairing"""
 
-        # Pair up light and heavy chains by sequence header
-        riot_data = riot_data.drop_duplicates(subset=["sequence_header", "barcode", "chain"], keep="first")
-        riot_wide_data = riot_data.pivot(index=["sequence_header", "barcode"], columns=["chain"], values=["v_call"])
-
-        riot_wide_data.columns = riot_wide_data.columns.droplevel(0)
-        riot_wide_data = riot_wide_data.rename(columns={"heavy": "v_heavy", "light": "v_light"})
-        riot_wide_data = riot_wide_data.dropna(subset=["v_heavy", "v_light"])
+        # Keep only rows with both vh and vl genes, and specific columns
+        riot_wide_data = riot_wide_data[["barcode", "v_heavy", "v_light"]].dropna(subset=["v_heavy", "v_light"])
 
         # Clean up v gene name. Remove allele information
-        for col in riot_wide_data.columns:
+        for col in ["v_heavy", "v_light"]:
             riot_wide_data.loc[:, col] = riot_wide_data[col].str.split("*").str[0]
 
         # Create dictionary of VH gene and VL gene pair counts
         v_genes_dict = {}
-        for (v_heavy, v_light), count in riot_wide_data.value_counts().items():
+        for (v_heavy, v_light), count in riot_wide_data[["v_heavy", "v_light"]].value_counts().items():
             v_genes_dict.setdefault(v_heavy, {})[v_light] = count
 
         # Create dictionary of vh gene counts per barcode
         vh_counts = pd.concat(
             [
-                riot_wide_data["v_heavy"].droplevel("sequence_header").groupby("barcode").value_counts(),
-                riot_wide_data["v_heavy"].droplevel("sequence_header").groupby("barcode").value_counts(normalize=True),
+                riot_wide_data.groupby("barcode")["v_heavy"].value_counts(),
+                riot_wide_data.groupby("barcode")["v_heavy"].value_counts(normalize=True),
             ],
             axis=1,
             keys=["count", "prop"],
@@ -244,8 +279,8 @@ class MultiqcModule(BaseMultiqcModule):
         # Create dictionary of vl gene counts per barcode
         vl_counts = pd.concat(
             [
-                riot_wide_data["v_light"].droplevel("sequence_header").groupby("barcode").value_counts(),
-                riot_wide_data["v_light"].droplevel("sequence_header").groupby("barcode").value_counts(normalize=True),
+                riot_wide_data.groupby("barcode")["v_light"].value_counts(),
+                riot_wide_data.groupby("barcode")["v_light"].value_counts(normalize=True),
             ],
             axis=1,
             keys=["count", "prop"],
@@ -274,6 +309,9 @@ class MultiqcModule(BaseMultiqcModule):
                 {"name": "VH genes"},
                 {"name": "VL genes"},
             ],
+            "tt_decimals": 0,
+            "tt_suffix": "reads",
+            "cpswitch_c_active": False,
         }
 
         # Add V gene composition bar plots to the report
@@ -311,7 +349,7 @@ class MultiqcModule(BaseMultiqcModule):
         self.add_section(
             name="RIOT: Germline V gene pairing",
             anchor="riot_genes_pairing",
-            description="Germline variable (V) gene pairing between heavy and light chains.",
+            description="Germline variable (V) gene pairing between heavy and light chains. Darker colours indicate greater abundance of that V gene pairing.",
             helptext="""
             Number of each germline V gene pairing between the heavy and light chains.
 
